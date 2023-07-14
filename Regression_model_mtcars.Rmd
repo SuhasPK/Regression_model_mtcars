@@ -1,0 +1,99 @@
+---
+title: "Motor Cars Data analysis"
+subtitle: "Johns Hopkins Data Science Project: Regression Model"
+author: "Suhas. P. K"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::downcute:
+    self_contained: true
+    default_style: "dark"
+    downcute_theme: "default"
+---
+
+
+```{r setup, include=FALSE}
+## Global options
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+# Introduction
+**Motor Trend** is a magazine about the automobile industry. In this analysis, a data set having information of car collection is explored to understand the relationship between **miles per gallon** and **transmission type**.\
+The data set is available from the CRAN repository.\
+
+## Libraries used.
+```{r libraries, echo=FALSE}
+library(ggplot2)
+library(ggdark)
+```
+
+
+## Reading the data set.
+```{r Read dataset mtcars}
+data(mtcars)
+```
+### Basics checking of the data set.
+```{r summary of mtcars}
+summary(mtcars)
+```
+### Check the structure of data set.
+```{r structure of mtcars}
+str(mtcars)
+```
+### Check for the missing data.
+```{r missing data in mtcars}
+colSums(is.na(mtcars))
+```
+There are no missing value.
+
+## Exploratory Data Analysis
+
+Understand the distribution of **miles per gallon** variable.
+
+```{r histogram of mpg}
+histplot <- ggplot(data = mtcars,
+                   aes(x = mtcars$mpg)) + geom_histogram(color = "black",fill = "lightgreen") +
+    xlab("miles per gallon")+
+    ggtitle("Histogram of Miles per gallon")+
+    dark_theme_light()
+histplot
+```
+
+Plotting a scatter plot based on the transmission type and mpg.
+```{r scatter plot}
+scttrplot <- ggplot(data = mtcars,
+                    aes(x = am, y = mpg, color = factor(am)))
+scttrplot + 
+    geom_point(size = 2) + 
+    geom_smooth(method=lm, color = "yellow")+ 
+    dark_theme_light()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
