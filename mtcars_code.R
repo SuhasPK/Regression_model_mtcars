@@ -50,5 +50,53 @@ boxplot(mpg~am, data = mtcars,
         col = topo.colors(factor(mtcars$am)))
 
 
+library(ggplot2)
+library(ggdark)
+histplot <- ggplot(data = mtcars,
+                   aes(x = mtcars$mpg)) + geom_histogram(color = "black",fill = "lightgreen") +
+    xlab("miles per gallon")+dark_theme_light()
+histplot
+
+levels(factor(mtcars$am))[2]
+
+scttrplot <- ggplot(data = mtcars,
+                    aes(x = am, y = mpg, color = factor(am)))+ 
+    geom_point(size = 2)+geom_smooth(method=lm, color = "yellow")
+
+scttrplot +
+    scale_colour_discrete(
+        name = "Transmission",
+        limits = c("0","1"),
+        labels = c("Automatic",
+                   "Manual")
+    )+dark_theme_light()
+
+ggplot(mtcars, aes(y = mpg, x = factor(am, labels = c("automatic", "manual")), fill = factor(am))) +
+    geom_boxplot(colour = "black", size = 1) + scale_colour_discrete(
+        name = "Transmission",
+        limits = c("0","1"),
+        labels = c("Automatic",
+                   "Manual"))+ 
+    xlab("Transmission") + ylab("mpg") 
+
+
+
+
+bxplot <- ggplot(mtcars, aes(x=factor(am),y = mpg, color = factor(am)))+
+    geom_boxplot() +
+    geom_point(stat = "summary",
+              fun = "median",
+              color = "white")+geom_label(label = with(mtcars, tapply(mpg,am,median)))
+    
+bxplot + scale_colour_discrete(
+    name = "Tranmission",
+    limits = c("0","1"),
+    labels = c("Automatic","Manual")
+) + dark_theme_light()
+typeof(as.integer(with(mtcars, tapply(mpg,am,median))))
+
+
+
+
 
 
