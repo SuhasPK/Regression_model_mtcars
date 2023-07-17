@@ -82,21 +82,28 @@ ggplot(mtcars, aes(y = mpg, x = factor(am, labels = c("automatic", "manual")), f
 
 
 
+
+
 bxplot <- ggplot(mtcars, aes(x=factor(am),y = mpg, color = factor(am)))+
     geom_boxplot() +
     geom_point(stat = "summary",
               fun = "median",
-              color = "white")+geom_label(label = with(mtcars, tapply(mpg,am,median)))
-    
-bxplot + scale_colour_discrete(
+              color = "white")
+bxplot +
+    scale_colour_discrete(
     name = "Tranmission",
     limits = c("0","1"),
     labels = c("Automatic","Manual")
 ) + dark_theme_light()
-typeof(as.integer(with(mtcars, tapply(mpg,am,median))))
 
 
-
-
+df <- data.frame(
+    x = factor(c(1, 1, 2, 2)),
+    y = c(1, 3, 2, 1),
+    grp = c("a", "b", "a", "b")
+)
+ggplot(data = df, aes(x, y, group = grp)) +
+    geom_col(aes(fill = grp), position = "dodge") +
+    geom_text(aes(label = y), position = position_dodge(0.9))
 
 

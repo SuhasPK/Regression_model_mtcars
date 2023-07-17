@@ -1,0 +1,166 @@
+---
+title: "Regression_model_mtcars_pdf"
+author: "Suhas P K"
+date: "2023-07-17"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+**Motor Trend** is a magazine about the automobile industry. In this analysis, a data set having information of car collection is explored to understand the relationship between **miles per gallon** and **transmission type**.\
+The data set is available from the CRAN repository.\
+
+## Libraries used.
+```{r libraries}
+library(tinytex)
+library(ggplot2)
+library(ggdark)
+```
+
+
+## Reading the data set.
+```{r Read dataset mtcars}
+data(mtcars)
+```
+### Basics checking of the data set.
+```{r summary of mtcars}
+summary(mtcars)
+```
+### Check the structure of data set.
+```{r structure of mtcars}
+str(mtcars)
+```
+### Check for the missing data.
+```{r missing data in mtcars}
+colSums(is.na(mtcars))
+```
+There are no missing value.
+
+## Exploratory Data Analysis
+### Preliminary analysis
+Understand the distribution of **miles per gallon** variable.
+
+```{r histogram of mpg}
+histplot <- ggplot(data = mtcars,
+                   aes(x = mtcars$mpg)) + geom_histogram(color = "black",fill = "lightgreen") +
+    xlab("miles per gallon")+
+    ggtitle("Histogram of Miles per gallon")+
+    dark_theme_light()
+histplot
+```
+
+Plotting a scatter plot based on the transmission type and mpg.
+```{r scatter plot}
+scttrplot <- ggplot(data = mtcars,
+                    aes(x = am, y = mpg, color = factor(am)))+ 
+    geom_point(size = 2)+geom_smooth(method=lm, color = "yellow")
+
+scttrplot +
+    xlab("Transmission")+
+    ylab("miles per gallon")+
+    scale_colour_discrete(
+        name = "Transmission",
+        limits = c("0","1"),
+        labels = c("Automatic",
+                   "Manual")
+    ) + dark_theme_linedraw()
+    
+```
+
+Visualizing the 'mpg' vs 'transmission' using boxplot.
+```{r boxplot}
+    bxplot <- ggplot(mtcars, aes(x=factor(am),y = mpg, color = factor(am)))+
+    geom_boxplot() +
+    geom_point(stat = "summary",
+              fun = "mean",
+              color = "white", label = "mean")+
+    xlab("Transmission")+
+    ylab("Miles per gallon")
+bxplot +
+    scale_colour_discrete(
+    name = "Tranmission",
+    limits = c("0","1"),
+    labels = c("Automatic","Manual")
+) + dark_theme_light()
+
+```
+To understand better from the scatter plot, the mean value of mpg based on the transmission type must be calculated. By far for this calculation I will use this method.
+```{r calculating mean of transmission type}
+mean_am <- with(mtcars,
+               tapply(mpg, am, mean))
+mean_am 
+```
+Now take the difference between the median based on the transmission type. With this we will get to know which transmission type has better mpg.
+```{r mean analysis}
+mean_am[2]-mean_am[1]
+```
+In this case, the mean shows that, cars recorded with manual transmission can travel 7.24 more miles per gallon on average than the cars with automatic transmission.\
+Thus, manual transmission is better than the automatic.
+
+### A bit advance analysis
+Performing **t-test** comparing the mean between the two transmission groups.
+```{r t-testing}
+am_auto <- mtcars$mpg[mtcars$am == 0]
+am_man <- mtcars$mpg[mtcars$am == 1]
+t.test(
+    am_auto, am_man,
+    paired = FALSE,
+    alternative = "two.sided",
+    var.equal = FALSE
+)
+```
+The confidence interval (95%) does not contain zero (-11.28,-3.21) and p-value is greater then 0.005. Then, it can conclude that the average consumption, in miles per gallon, with automatic transmission is higher than the manual transmission. In this case, the mean analysis, it is possible to
+quantify the MPG difference between automatic and manual transmissions: 7.24 mpg greater, subtracting means.
+
+### Regression analysis
+**Single Model linear model**
+The analysis is made to compare results from the **mean analysis**. The null hypothesis is that the difference between mean of **mpg** and **am** is zero.
+
+```{r lm}
+single_model <- 
+    lm(mtcars$mpg ~ mtcars$am)
+summary(single_model)$coefficients
+```
+
+The results show us that the p-value of the slope is less than 0.005. Then, it can reject the null hypothesis, and the results of the exploratory analysis were confirmed: automatic transmission results are 7.245 miles per gallon greater. If the slope is greater than zero, manual transmission is better than the automatic one.
+
+### Multivariable analysis.
+```{r multivariable model}
+require(MASS)
+
+multi_model <- stepAIC(
+    lm(mpg~. , data = mtcars),
+    direction = "both",
+    trace = FALSE
+)
+multi_model$anova
+
+
+```
+The **best model** indicated by the automated analysis consists of the variables **wt**, **qsec**, **am** and **mpg** as the outcome.
+
+```{r final model}
+final_model <- lm(mtcars$mpg ~
+                      mtcars$wt + mtcars$qsec + mtcars$am)
+summary(final_model)$coefficients
+```
+
+Then, the regression equation is $mpg = 9.618 -3.917 wt + 1.226 qsec + 1.4109 am$ . It is assumed that $Errors = 0$. As the two-sided p-value for the **am** coefficient is 0.04672, smaller than 0.05, it can we reject the null hypothesis.Looking at the plots,
+
+```{r residual plot}
+par(mfrow = c(2,2))
+plot(final_model)
+```
+Final Model Residuals
+, the visual analysis show us that the behavior of the
+best model is adequate considering normal residuals and constant variability. The leverage is within reasonable upper limit.
+
+## Conclusion
+- Manual transmission is better than the automatic.
+- Cars analyzed with manual transmission can travel 7.24 more miles per gallon on average than the cars with automatic transmission.
+- There is a correlation between mpg and transmission, but other variables should also be considered, as qsec and wt, beyond the type of transmission.
+- The obtained regression equation is
+**mpg = 9.618 -3.917 wt + 1.226 qsec + 1.4109 am** . Then, for the same weight (wt) and quarter mile time (qsec),manual transmission cars get 1.4109 miles per gallon more than automatic transmission cars.
